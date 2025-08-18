@@ -11,5 +11,5 @@
 1. 安装依赖：
    ```bash
    pip install -r requirements.txt
-python app.py
-#yrz.
+python app.py\n
+#yrz   ^_^.
