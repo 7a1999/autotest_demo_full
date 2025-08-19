@@ -12,7 +12,7 @@ def main():
         reporter.log(f"[设备] {msg}")
         values.append(value)
 
-    sim = SerialSimulator(on_data=on_data, interval=1.0)  # 1Hz 采样
+    sim = SerialSimulator(on_data=on_data, interval=1.0,temp_max=100.0,temp_min=50.0)  # 1Hz 采样
 
     reporter.log("测试开始")
     sim.start()

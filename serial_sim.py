@@ -25,6 +25,13 @@ class SerialSimulator:
         self._stop = threading.Event()
         self._th: Optional[threading.Thread] = None
 
+    def set_range(self, temp_min: float, temp_max: float):
+            """设置温度范围，并检查合法性"""
+            if temp_max <= temp_min:
+                raise ValueError("温度上限必须大于下限")
+            self.temp_min = temp_min
+            self.temp_max = temp_max
+
     def start(self) -> None:
         """启动后台线程"""
         if self._th and self._th.is_alive():
