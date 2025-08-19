@@ -83,7 +83,7 @@ if __name__ == "__main__":
         time.sleep(2)
         sim.stop()
     except ValueError as e:
-        # ✅ 控制台友好提示
+        #  控制台提示
         print(f"❌ 配置错误：{e}")
-        # ✅ 让 PyCharm 显示为“异常退出”（非0码）
+        #  让 PyCharm 显示为“异常退出”（非0码）
         sys.exit(1)
