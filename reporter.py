@@ -25,7 +25,7 @@ class Reporter:
         """
         :param filename: 自定义文件名（可不带后缀或带任意后缀）
         :param ensure_txt: 是否强制改为/补上 .txt 后缀
-        :param auto_print: 调用 log() 时是否同步 print 到控制台
+        :param auto_print: 调用 log() 时是否同步 print 到控制台（目前没有调用，以后再加）
         """
         renamed_from = None
 
@@ -34,19 +34,18 @@ class Reporter:
             ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             filename = f"test_report_{ts}.txt"
 
-        original = filename  # 记录用户原始输入（用于提示）
-
+        original = filename  # 记录用户原始输入（后期如果自动修改了名称可以用于提示一下用户）
         # 2) 过滤 Windows 非法字符：\ / : * ? " < > |
         filename = re.sub(r'[\\/:*?"<>|]', "_", filename)
-
         # 3) 统一/纠正后缀为 .txt
+
         if ensure_txt:
             # 是否“看起来有后缀”（仅检查结尾的 .xxx）
             if re.search(r"\.[A-Za-z0-9]+$", filename):
                 # 有后缀：一律替换成 .txt（实现自动纠正/统一大小写）
                 new_name = re.sub(r"\.[A-Za-z0-9]+$", ".txt", filename)
                 if new_name != original:
-                    renamed_from = original
+                    renamed_from = original     #存入变量，进行提示
                 filename = new_name
             else:
                 # 无后缀：补上 .txt
@@ -62,7 +61,7 @@ class Reporter:
         # 4) 若发生更名，打印提示
         if self.renamed_from:
             print(f"⚠ 已自动更正文件名：'{self.renamed_from}' → '{self.filename}'")
-
+            #如果原文件带了txt后缀，则直接跳出（初始值是none）
     def log(self, msg: str) -> None:
         """写一行带时间戳的日志；根据 auto_print 决定是否 print 出来"""
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

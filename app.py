@@ -4,7 +4,7 @@ import time
 import sys
 
 def main():
-    reporter = Reporter(filename='yrz|testNo3)')  # 默认自动带时间戳的.txt 文件
+    reporter = Reporter(filename='yrz_testNo4.atatat')  # 默认自动带时间戳的.txt 文件
     values = []
 
     def on_data(msg: str, value: float):
