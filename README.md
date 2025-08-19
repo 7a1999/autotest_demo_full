@@ -1,4 +1,4 @@
-<img width="2549" height="1412" alt="image" src="https://github.com/user-attachments/assets/9b54be26-77f2-4de4-8741-c0448815a835" /># autotest_demo_full
+
 
 一个 Python 自动化测试项目示例，适用于初学者入门自动化测试开发（后续在AI基础上增加更多功能）。
 
