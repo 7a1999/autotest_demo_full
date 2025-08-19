@@ -1,10 +1,10 @@
 from serial_sim import SerialSimulator
 from reporter import Reporter
 import time
-
+import sys
 
 def main():
-    reporter = Reporter()  # 默认自动带时间戳的 .txt 文件
+    reporter = Reporter()  # 默认自动带时间戳的.txt 文件
     values = []
 
     def on_data(msg: str, value: float):
@@ -12,9 +12,22 @@ def main():
         reporter.log(f"[设备] {msg}")
         values.append(value)
 
-    sim = SerialSimulator(on_data=on_data, interval=1.0,temp_max=100.0,temp_min=50.0)  # 1Hz 采样
-
     reporter.log("测试开始")
+
+    # —— 创建模拟器：加入友好错误提示 —— #
+    try:
+        sim = SerialSimulator(
+            on_data=on_data,
+            interval=1.0,
+            temp_max=100.0,
+            temp_min=500.0,   # 故意写错时，会在这里抛 ValueError
+        )
+    except ValueError as e:
+        reporter.log(f"❌ 配置错误：{e}")
+        txt_path = reporter.save()
+        print(f"\n已保存 TXT 报告: {txt_path}")
+        sys.exit(1)  # 非零退出码
+
     sim.start()
 
     try:
@@ -41,7 +54,6 @@ def main():
         reporter.log("测试结束")
         txt_path = reporter.save()
         print(f"\n已保存 TXT 报告: {txt_path}")
-
 
 if __name__ == "__main__":
     main()
