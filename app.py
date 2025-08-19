@@ -4,7 +4,7 @@ import time
 import sys
 
 def main():
-    reporter = Reporter()  # 默认自动带时间戳的.txt 文件
+    reporter = Reporter(filename='yrz|testNo3)')  # 默认自动带时间戳的.txt 文件
     values = []
 
     def on_data(msg: str, value: float):
@@ -20,7 +20,7 @@ def main():
             on_data=on_data,
             interval=1.0,
             temp_max=100.0,
-            temp_min=500.0,   # 故意写错时，会在这里抛 ValueError
+            temp_min=50.0,   # 故意写错时，会在这里抛 ValueError
         )
     except ValueError as e:
         reporter.log(f"❌ 配置错误：{e}")
