@@ -1,15 +1,7 @@
-import threading
-import time
-import random
+import threading, time, random
 from typing import Callable, Optional
 
-
 class SerialSimulator:
-    """
-    简易“串口设备”模拟器：
-    - 每隔 interval 秒输出一次温度（temp_min ~ temp_max）
-    - on_data 可选回调：on_data(message: str, value: float)
-    """
     def __init__(
         self,
         interval: float = 1.0,
@@ -18,22 +10,49 @@ class SerialSimulator:
         on_data: Optional[Callable[[str, float], None]] = None,
     ):
         self.interval = interval
-        self.temp_min = temp_min
-        self.temp_max = temp_max
         self._on_data = on_data
+
+        # 用私有属性+property 封装
+        self._temp_min: float = 0.0
+        self._temp_max: float = 0.0
+        self.set_range(temp_min, temp_max)   # ✅ 构造时一次性校验并设置
 
         self._stop = threading.Event()
         self._th: Optional[threading.Thread] = None
 
-    def set_range(self, temp_min: float, temp_max: float):
-            """设置温度范围，并检查合法性"""
-            if temp_max <= temp_min:
-                raise ValueError("温度上限必须大于下限")
-            self.temp_min = temp_min
-            self.temp_max = temp_max
+    # ---------- 可随时修改的属性（带校验） ----------
+    @property
+    def temp_min(self) -> float:
+        return self._temp_min
 
+    @temp_min.setter
+    def temp_min(self, value: float) -> None:
+        if value >= self._temp_max:
+            raise ValueError("温度下限必须小于当前上限")
+        self._temp_min = float(value)
+
+    @property
+    def temp_max(self) -> float:
+        return self._temp_max
+
+    @temp_max.setter
+    def temp_max(self, value: float) -> None:
+        if value <= self._temp_min:
+            raise ValueError("温度上限必须大于当前下限")
+        self._temp_max = float(value)
+
+    def set_range(self, temp_min: float, temp_max: float) -> None:
+        """一次性修改上下限，避免分步赋值的临时非法状态。"""
+        if temp_max <= temp_min:
+            raise ValueError("温度上限必须大于下限")
+        self._temp_min = float(temp_min)
+        self._temp_max = float(temp_max)
+
+    # ---------- 其余逻辑不变 ----------
     def start(self) -> None:
-        """启动后台线程"""
+        # 运行前再保险校验一次
+        if self._temp_max <= self._temp_min:
+            raise ValueError("温度上限必须大于下限")
         if self._th and self._th.is_alive():
             return
         self._stop.clear()
@@ -41,9 +60,8 @@ class SerialSimulator:
         self._th.start()
 
     def _simulate_data(self) -> None:
-        """后台产出数据"""
         while not self._stop.is_set():
-            value = round(random.uniform(self.temp_min, self.temp_max), 2)
+            value = round(random.uniform(self._temp_min, self._temp_max), 2)
             line = f"温度数据: {value:.2f} °C"
             print(f"[SerialSimulator] {line}")
             if self._on_data:
@@ -54,19 +72,7 @@ class SerialSimulator:
             time.sleep(self.interval)
 
     def stop(self) -> None:
-        """请求停止并等待线程退出"""
         self._stop.set()
         if self._th and self._th.is_alive():
             self._th.join(timeout=2.0)
             self._th = None
-
-
-if __name__ == "__main__":
-    # 单文件自运行测试：Ctrl+C 停止
-    sim = SerialSimulator()
-    sim.start()
-    try:
-        while True:
-            time.sleep(0.5)
-    except KeyboardInterrupt:
-        sim.stop()
